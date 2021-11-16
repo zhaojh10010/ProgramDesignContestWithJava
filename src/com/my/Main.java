@@ -1,8 +1,6 @@
 package com.my;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * 参考书目: 挑战程序设计竞赛（第二版）
@@ -10,13 +8,17 @@ import java.util.Collections;
  * */
 public class Main {
     //2.1.5 - BFS - maze shortest route
+    //BFS核心是利用队列来遍历, 有多少个格子就有多少种状态O(n*m)
+    public static int MAX_ROUTE = 100;
     private static void mazeRoute(int n, int m, char[][] maze) {
         int startX = -1;
         int startY = -1;
         int endX = -1;
         int endY = -1;
+        int[][] temp = new int[n][m];
         for(int i=0;i<n;i++) {
             for(int j=0;j<m;j++) {
+                temp[i][j] = MAX_ROUTE;
                 if(maze[i][j]=='S') {
                     startX = i;
                     startY = j;
@@ -28,19 +30,36 @@ public class Main {
             }
         }
         int len = 0;
-        int min = bfs(len,startX-1,startY,n,m,maze);
-        System.out.println("Min route is: "+min);
+        Queue<int[]> que = new LinkedList<>();
+        que.add(new int[]{startX, startY});
+        temp[startX][startY] = 0;
+        bfs(len,n,m,maze,temp,que);
+        System.out.println("Min route is: "+temp[endX][endY]);
+        print2DArray(maze,n,m);
+        print2DArray(temp,n,m);
     }
 
-    private static int bfs(int len, int i, int j,int n,int m,char[][] maze) {
-        if(i==-1 || j==-1 || i==n || j==m || maze[i][j]=='#' || maze[i][j]=='S') return Integer.MAX_VALUE;
-        if(maze[i][j]=='G') return len;
-        len++;
-        int a = bfs(len,i-1,j,n,m,maze);
-        int b = bfs(len,i,j-1,n,m,maze);
-        int c = bfs(len,i+1,j,n,m,maze);
-        int d = bfs(len,i,j+1,n,m,maze);
-        return Math.min(a,Math.min(b,Math.min(c,d)));
+    private static void bfs(int len,int n,int m,char[][] maze,int[][] temp,Queue<int[]> que) {
+        while(!que.isEmpty()) {
+            int[] point = que.poll();
+            int x = point[0];
+            int y = point[1];
+            temp[x][y] = len;
+            len++;
+            if(maze[x][y]=='G') {
+                break;
+            }
+            int[] ox = {0,1,0,-1};
+            int[] oy = {1,0,-1,0};
+            for(int i=0;i<4;i++) {
+                int newX = x+ox[i];
+                int newY = y+oy[i];
+                if(newX!=-1 && newY!=-1 && newX<n && newY<m && maze[newX][newY]!='#' && maze[newX][newY]!='S' && temp[newX][newY]==MAX_ROUTE) {
+                    que.add(new int[]{newX,newY});
+                    bfs(len,n,m,maze,temp,que);
+                }
+            }
+        }
     }
 
 
@@ -167,6 +186,23 @@ public class Main {
             int perimeter = l[i]+l[i-1]+l[i-2];
             System.out.println("Max perimeter is: "+l[i]+"+"+l[i-1]+"+"+l[i-2]+"="+perimeter);
             break;
+        }
+    }
+
+    public static void print2DArray(char[][] arr, int w, int h) {
+        for(int i=0;i<w;i++) {
+            for(int j=0;j<h;j++) {
+                System.out.print(arr[i][j]);
+            }
+            System.out.println();
+        }
+    }
+    public static void print2DArray(int[][] arr, int w, int h) {
+        for(int i=0;i<w;i++) {
+            for(int j=0;j<h;j++) {
+                System.out.printf("%-5d",arr[i][j]);
+            }
+            System.out.println();
         }
     }
 
